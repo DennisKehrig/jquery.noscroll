@@ -1,12 +1,12 @@
 /*!
- * NoScroll 0.3 (jQuery plugin)
+ * NoScroll 0.4 (jQuery plugin)
  * Makes a container node unscrollable while maintaining its scroll position
  * Measures the difference in size and triggers an event to maintain the original width
  *
  * Usage:
  * // Turn scrolling off
  * $('body').noscroll(true);
- * 
+ *
  * // Turn scrolling back on
  * $('body').noscroll(false);
  *
@@ -33,40 +33,47 @@
 			if ($.isFunction(setting_or_callback)) {
 				// Register the callback
 				$container.bind('noscroll', setting_or_callback);
-			} else if (setting_or_callback === true) {
-				// Turn scrolling off
-				
-				// Remember the scroll position so we can counteract browsers scrolling to the top when restoring the overflow state
-				$container.data('noscroll', {
-					top:		$container.scrollTop(),
-					left:		$container.scrollLeft(),
-					overflow:	$container.css('overflow')
-				});
-				
-				// Turn scrolling off and measure the effect on the width
-				originalWidth = $container.width();
-				$container.css('overflow', 'hidden');
-				gap = $container.width() - originalWidth;
-				
-				// Trigger the noscroll event
-				$container.trigger('noscroll', [true, gap]);
-			} else if (setting_or_callback === false) {
-				// Turn scrolling back on
-				
+			} else {
 				previousState = $container.data('noscroll');
-				if (previousState) {
-					// Turn scrolling back on and measure the effect on the width
-					originalWidth = $container.width();
-					$container.css('overflow', previousState.overflow);
-					gap = $container.width() - originalWidth;
+
+				if (setting_or_callback === false) {
+					// Turn scrolling back on
 					
-					// Trigger the noscroll event
-					$container.trigger('noscroll', [false, gap]);
-				
-					// Restore the scroll position
-					$container
-						.scrollTop(previousState.top)
-						.scrollLeft(previousState.left);
+					if (previousState) {
+						// Turn scrolling back on and measure the effect on the width
+						originalWidth = $container.width();
+						$container.css('overflow', previousState.overflow);
+						gap = $container.width() - originalWidth;
+						
+						// Trigger the noscroll event
+						$container.trigger('noscroll', [false, gap]);
+					
+						// Restore the scroll position
+						$container
+							.scrollTop(previousState.top)
+							.scrollLeft(previousState.left);
+
+						$container.data('noscroll', null);
+					}
+				} else if (setting_or_callback === true) {
+					if (! previousState) {
+						// Turn scrolling off
+						
+						// Remember the scroll position so we can counteract browsers scrolling to the top when restoring the overflow state
+						$container.data('noscroll', {
+							top:		$container.scrollTop(),
+							left:		$container.scrollLeft(),
+							overflow:	$container.css('overflow')
+						});
+						
+						// Turn scrolling off and measure the effect on the width
+						originalWidth = $container.width();
+						$container.css('overflow', 'hidden');
+						gap = $container.width() - originalWidth;
+						
+						// Trigger the noscroll event
+						$container.trigger('noscroll', [true, gap]);
+					}
 				}
 			}
 		});
